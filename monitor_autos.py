@@ -25,7 +25,7 @@ import re
 import csv
 import sqlite3
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -76,6 +76,7 @@ def parse_list(name: str, default_list: list[str]) -> list[str]:
 # User/API config
 PHONE = get_env("PHONE", "")  # e.g. +491570000000
 CALLMEBOT_APIKEY = get_env("CALLMEBOT_APIKEY", "")
+CALLMEBOT_STRIP_PLUS = get_env("CALLMEBOT_STRIP_PLUS", "true").lower() in ("1", "true", "yes")
 
 # Files
 CSV_FILE = get_env("CSV_FILE", "auto_export_finder.csv")
@@ -166,7 +167,7 @@ def mark_seen(conn, link: str, title: str, site: str, price: str):
     c = conn.cursor()
     c.execute(
         "INSERT OR IGNORE INTO seen (link, title, site, price, first_seen) VALUES (?, ?, ?, ?, ?)",
-        (link, title, site, price, datetime.utcnow()),
+        (link, title, site, price, datetime.now(timezone.utc)),
     )
     conn.commit()
 
@@ -180,17 +181,25 @@ def send_whatsapp(message: str) -> bool:
         print("[WARN] CallMeBot API key or PHONE not set. Skipping WhatsApp send.")
         return False
     try:
+        phone_param = PHONE.strip().replace(' ', '')
+        if CALLMEBOT_STRIP_PLUS and phone_param.startswith('+'):
+            phone_param = phone_param[1:]
         payload = {
-            "phone": PHONE,
+            "phone": phone_param,
             "text": message,
             "apikey": CALLMEBOT_APIKEY,
         }
+        print(f"[DEBUG] CallMeBot request phone={phone_param} apikey={CALLMEBOT_APIKEY[:6]}... len(text)={len(message)}")
         url = "https://api.callmebot.com/whatsapp.php"
         r = requests.get(url, params=payload, timeout=20)
+        body_snip = (r.text or "")[:300]
         if r.status_code == 200:
-            print("[OK] WhatsApp sent.")
+            if "APIKey is invalid" in body_snip or "error" in body_snip.lower():
+                print("[ERR] WhatsApp 200 but error body:", body_snip)
+                return False
+            print("[OK] WhatsApp sent. Response snippet:", body_snip)
             return True
-        print("[ERR] WhatsApp API returned", r.status_code, r.text[:300])
+        print("[ERR] WhatsApp API returned", r.status_code, body_snip)
         return False
     except Exception as e:
         print("[ERR] WhatsApp send error:", e)
@@ -201,7 +210,7 @@ def send_whatsapp(message: str) -> bool:
 # Selenium driver
 # ----------------------------
 
-def init_driver(headless: bool = True):
+def init_driver(headless: bool = False):
     options = webdriver.ChromeOptions()
     if headless:
         options.add_argument("--headless=new")
@@ -474,7 +483,7 @@ def run_once():
             if not file_exists:
                 writer.writeheader()
             for e in all_new:
-                writer.writerow({"timestamp": datetime.utcnow().isoformat(), **e})
+                writer.writerow({"timestamp": datetime.now(timezone.utc).isoformat(), **e})
 
         count = 0
         for e in all_new:
@@ -484,8 +493,10 @@ def run_once():
                 f"Neues Fahrzeug: {e['title']} | Preis: {e['price']} | "
                 f"Seite: {e['site']} | Link: {e['link']}"
             )
-            send_whatsapp(msg)
-            count += 1
+            if send_whatsapp(msg):
+                count += 1
+            else:
+                print(f"[WARN] WhatsApp not sent for: {e['link']}")
         print(f"[INFO] {len(all_new)} neue Treffer (davon {count} per WhatsApp gesendet).")
     else:
         print("[INFO] Keine neuen Treffer dieses Laufs.")

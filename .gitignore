@@ -26,3 +26,7 @@ chrome-driver*/
 # Cache
 .cache/
 .selenium/
+
+# results
+*.csv
+*.db

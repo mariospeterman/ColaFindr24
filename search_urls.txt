@@ -17,8 +17,8 @@ https://suchen.mobile.de/fahrzeuge/search.html?isSearchRequest=true&fuels=Diesel
 # AutoScout24 DE — Diesel=2; supports yearfrom, kmto, priceto (no min price)
 https://www.autoscout24.de/lst?atype=C&fuels=2&yearfrom={min_year}&kmto={max_km}&priceto={max_price}
 
-# AutoScout24 CH — similar filters on .ch
-https://www.autoscout24.ch/de/autos/?fuel=2&yearfrom={min_year}&kmto={max_km}&priceto={max_price}
+# AutoScout24 CH — CH-scoped, Diesel, brands list, and hadAccidentOnly=true
+https://www.autoscout24.ch/de/s/ft-diesel?firstRegistrationYearFrom={min_year}&mileageTo={max_km}&priceTo={max_price}&makeModelVersions%5B0%5D%5BmakeKey%5D=mercedes-benz&makeModelVersions%5B1%5D%5BmakeKey%5D=bmw&makeModelVersions%5B2%5D%5BmakeKey%5D=audi&makeModelVersions%5B3%5D%5BmakeKey%5D=vw&makeModelVersions%5B4%5D%5BmakeKey%5D=skoda&makeModelVersions%5B5%5D%5BmakeKey%5D=porsche&makeModelVersions%5B6%5D%5BmakeKey%5D=toyota&hadAccidentOnly=true
 
 # willhaben (AT) — refine in browser; add Treibstoff=Diesel, Erstzulassung ab, km bis, Preis bis
 https://www.willhaben.at/iad/kaufen-und-verkaufen/auto/alle-autos/marke/alle?scoring=STANDARD
