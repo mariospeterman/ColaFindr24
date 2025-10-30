@@ -1,0 +1,37 @@
+# One URL template per line. Lines starting with # are ignored.
+# Placeholders you can use:
+#   {min_year} {max_year}
+#   {min_km} {max_km}
+#   {min_price} {max_price}
+#   {kw}
+# Back-compat: {year} maps to {min_year}; {km} -> {max_km}; {price} -> {max_price}
+#
+# Best practice:
+# - Build exact URLs in your browser, then paste here, keeping placeholders where useful.
+# - Keep country/region scopes in the URL.
+# - Prefer ranges if supported; otherwise min-only or max-only as applicable.
+
+# mobile.de (DE) — supports min first registration, max km, max price (no max-year param)
+https://suchen.mobile.de/fahrzeuge/search.html?isSearchRequest=true&fuels=Diesel&minFirstRegistrationDate={min_year}&maxMileage={max_km}&maxPrice={max_price}
+
+# AutoScout24 DE — Diesel=2; supports yearfrom, kmto, priceto (no min price)
+https://www.autoscout24.de/lst?atype=C&fuels=2&yearfrom={min_year}&kmto={max_km}&priceto={max_price}
+
+# AutoScout24 CH — similar filters on .ch
+https://www.autoscout24.ch/de/autos/?fuel=2&yearfrom={min_year}&kmto={max_km}&priceto={max_price}
+
+# willhaben (AT) — refine in browser; add Treibstoff=Diesel, Erstzulassung ab, km bis, Preis bis
+https://www.willhaben.at/iad/kaufen-und-verkaufen/auto/alle-autos/marke/alle?scoring=STANDARD
+
+# leboncoin (FR) — use {kw}; add filters in browser (diesel/price/km/year). Some filters stored in cookies.
+https://www.leboncoin.fr/recherche?category=2&search_in=subject%2Cdescription&text={kw}
+
+# finn.no (NO) — supports fuel group, year_from, mileage_to, price_to (NOK)
+https://www.finn.no/car/search/classifieds?fuel_group=2&year_from={min_year}&mileage_to={max_km}&price_to={max_price}
+
+# blocket.se (SE) — fuel=1 (diesel), q={kw}; add price/year/km via UI for better results
+https://www.blocket.se/annonser/hela_sverige/fordon?ca=11&cg=1020&fuel=1&q={kw}
+
+# Optional (LU): Luxembourg — try AutoScout24 with country cy=L, or luxauto.lu
+# https://www.autoscout24.com/lst?fuel=diesel&yearfrom={min_year}&kmto={max_km}&priceto={max_price}&cy=L
+# https://www.luxauto.lu/fr/annonces/voitures?fuel=diesel&yearfrom={min_year}&kmto={max_km}&priceto={max_price}
